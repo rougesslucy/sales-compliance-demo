@@ -33,8 +33,9 @@
       z-index: 20;
       padding: 10px 16px;
       backdrop-filter: blur(16px);
-      background: radial-gradient(circle at top left, rgba(59,130,246,0.35), transparent 55%)
-                  ,linear-gradient(to right, rgba(15,23,42,0.96), rgba(15,23,42,0.92));
+      background:
+        radial-gradient(circle at top left, rgba(59,130,246,0.35), transparent 55%),
+        linear-gradient(to right, rgba(15,23,42,0.96), rgba(15,23,42,0.92));
       border-bottom: 1px solid rgba(148,163,184,0.3);
       display: flex;
       align-items: center;
@@ -60,7 +61,9 @@
       color: #020617;
       font-weight: 800;
       font-size: 16px;
-      box-shadow: 0 0 0 2px rgba(248,250,252,0.05), 0 8px 18px rgba(15,23,42,0.8);
+      box-shadow:
+        0 0 0 2px rgba(248,250,252,0.05),
+        0 8px 18px rgba(15,23,42,0.8);
     }
     header h1 small {
       font-size: 11px;
@@ -287,6 +290,27 @@
       z-index:1;
     }
 
+    /* === 答题结果高亮 === */
+    .question-status {
+      font-size: 11px;
+      margin-top: 4px;
+    }
+    .question-correct {
+      border-color: rgba(34,197,94,0.9);
+      box-shadow: 0 0 0 1px rgba(34,197,94,0.4);
+    }
+    .question-wrong {
+      border-color: rgba(239,68,68,0.95);
+      box-shadow: 0 0 0 1px rgba(239,68,68,0.5);
+    }
+    .question-missing {
+      border-style: dashed;
+      border-color: rgba(234,179,8,0.9);
+    }
+    .question-status.correct { color: #bbf7d0; }
+    .question-status.wrong { color: #fecaca; }
+    .question-status.missing { color: #fde68a; }
+
     .option {
       position:relative;
       z-index:1;
@@ -399,7 +423,7 @@
     const SALES = [
       { id: 1, name: "张三", dept: "销售一部" },
       { id: 2, name: "李四", dept: "销售二部" },
-      { id: 3, name: "王五", dept: "大客户部" },
+      { id: 3, name: "王五", dept: "大客户部" }
     ];
 
     const QUESTIONS = [
@@ -410,10 +434,10 @@
           "账期超过90天且无任何担保/预付款",
           "在合同中写明回款账户为公司对公账户",
           "在合同中约定发票类型为专票",
-          "在合同中约定按月结算",
+          "在合同中约定按月结算"
         ],
         correctIndex: 0,
-        tag: "付款条款-账期与担保",
+        tag: "付款条款-账期与担保"
       },
       {
         id: 2,
@@ -422,10 +446,10 @@
           "双方互为无限责任，对一切直接和间接损失负责",
           "乙方承担所有直接损失，上不封顶",
           "双方对直接损失承担责任，总额不超过当期合同金额或已付金额的一定比例",
-          "不设置违约金约定，交由法院自由裁量",
+          "不设置违约金约定，交由法院自由裁量"
         ],
         correctIndex: 2,
-        tag: "违约责任-赔偿上限",
+        tag: "违约责任-赔偿上限"
       },
       {
         id: 3,
@@ -434,11 +458,11 @@
           "只要合同签了，对方自动获得公司所有相关产品的知识产权",
           "交付成果的知识产权归属可以单独约定，未约定时一般默认归开发方所有",
           "交付成果知识产权一定归客户所有",
-          "合同中无需约定知识产权归属",
+          "合同中无需约定知识产权归属"
         ],
         correctIndex: 1,
-        tag: "知识产权-成果归属",
-      },
+        tag: "知识产权-成果归属"
+      }
     ];
 
     const STORAGE_KEY = "sales_compliance_data_v2";
@@ -447,7 +471,7 @@
       try {
         const raw = localStorage.getItem(STORAGE_KEY);
         if (raw) return JSON.parse(raw);
-      } catch {}
+      } catch (e) {}
       return { exam_results: [], error_cases: [] };
     }
     function saveData() {
@@ -597,7 +621,7 @@
       right.innerHTML = html;
     }
 
-    // ---- 左侧：视角切换 ----
+    // ---- 左侧：视角切换：销售视角（带错题高亮）----
     function renderSalesView() {
       const s = SALES.find(x => x.id === currentSalesId);
       const status = getStatus(currentSalesId);
@@ -614,7 +638,7 @@
         <div id="questions-area">`;
 
       QUESTIONS.forEach(q => {
-        html += `<div class="question">
+        html += `<div class="question" data-qid="${q.id}">
           <p><strong>Q${q.id}.</strong> ${q.text}</p>
           <div class="small" style="margin-bottom:4px;">知识点：${q.tag}</div>`;
         q.options.forEach((opt, idx) => {
@@ -624,6 +648,7 @@
             <span>${opt}</span>
           </label>`;
         });
+        html += `<div id="q-status-${q.id}" class="question-status"></div>`;
         html += `</div>`;
       });
 
@@ -748,34 +773,74 @@
       document.getElementById("left-panel").innerHTML = html;
     }
 
-    // ---- 提交逻辑 ----
+    // ---- 提交考试：高亮错题 & 未作答 ----
     function submitExam() {
       const answers = {};
       let missing = 0;
+      let correct = 0;
+      const wrongIds = [];
+
       QUESTIONS.forEach(q => {
+        const container = document.querySelector(`.question[data-qid="${q.id}"]`);
+        const statusEl = document.getElementById(`q-status-${q.id}`);
+
+        if (container) {
+          container.classList.remove("question-correct", "question-wrong", "question-missing");
+        }
+        if (statusEl) {
+          statusEl.textContent = "";
+          statusEl.className = "question-status";
+        }
+
         const chosen = document.querySelector(`input[name="q${q.id}"]:checked`);
-        if (!chosen) missing++;
-        else answers[q.id] = Number(chosen.value);
+        if (!chosen) {
+          missing++;
+          if (container && statusEl) {
+            container.classList.add("question-missing");
+            statusEl.textContent = "⚠ 这一题还没作答";
+            statusEl.classList.add("missing");
+          }
+          return;
+        }
+
+        const idx = Number(chosen.value);
+        answers[q.id] = idx;
+
+        if (idx === q.correctIndex) {
+          correct++;
+          if (container && statusEl) {
+            container.classList.add("question-correct");
+            statusEl.textContent = "✅ 当前回答正确";
+            statusEl.classList.add("correct");
+          }
+        } else {
+          wrongIds.push(q.id);
+          if (container && statusEl) {
+            container.classList.add("question-wrong");
+            statusEl.textContent = "❌ 当前回答错误，请重新选择";
+            statusEl.classList.add("wrong");
+          }
+        }
       });
+
       if (missing > 0) {
-        showToast(`还有 ${missing} 题未作答`);
+        showToast(`还有 ${missing} 题未作答，请补充后再次提交。`);
         return;
       }
-      let correct = 0;
-      QUESTIONS.forEach(q => {
-        if (answers[q.id] === q.correctIndex) correct++;
-      });
+
       const score = Math.round((correct / QUESTIONS.length) * 100);
       data.exam_results.push({
         user_id: currentSalesId,
         score,
-        time: new Date().toLocaleString(),
+        time: new Date().toLocaleString()
       });
       saveData();
+
       if (score === 100) {
         showToast(`本次得分 ${score} 分：已满分通过，系统记录为“合规上岗”。`);
       } else {
-        showToast(`本次得分 ${score} 分，尚未达到 100 分，请继续学习并再次作答。`);
+        const list = wrongIds.map(id => "Q" + id).join("、");
+        showToast(`本次得分 ${score} 分。答错题目：${list}，界面中已用红框标出，请修改后再交卷。`);
       }
       renderRightPanel();
     }
@@ -799,7 +864,7 @@
         tag: ai.tag,
         severity: ai.severity,
         analysis: ai.analysis,
-        time: new Date().toLocaleString(),
+        time: new Date().toLocaleString()
       });
       saveData();
       showToast("已记录该错误并生成风险标签。");
