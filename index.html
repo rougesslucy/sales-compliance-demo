@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>销售合规卫士 · Web Demo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --bg: #050816;
+      --card-bg: #0b1020;
+      --card-border: #1f2937;
+      --accent-sales: #22c55e;
+      --accent-legal: #f97316;
+      --accent-admin: #3b82f6;
+      --text-main: #e5e7eb;
+      --text-sub: #9ca3af;
+      --radius-lg: 18px;
+      --shadow-soft: 0 18px 45px rgba(15,23,42,0.6);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
+      background: radial-gradient(circle at top left,#0f172a,#020617 55%,#000);
+      color: var(--text-main);
+      min-height: 100vh;
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      padding: 10px 16px;
+      backdrop-filter: blur(16px);
+      background: radial-gradient(circle at top left, rgba(59,130,246,0.35), transparent 55%)
+                  ,linear-gradient(to right, rgba(15,23,42,0.96), rgba(15,23,42,0.92));
+      border-bottom: 1px solid rgba(148,163,184,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    header h1 {
+      font-size: 16px;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      letter-spacing: 0.03em;
+    }
+    header h1 span.logo {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 30px;
+      height: 30px;
+      border-radius: 999px;
+      background: radial-gradient(circle at 30% 30%, #facc15, #ea580c);
+      color: #020617;
+      font-weight: 800;
+      font-size: 16px;
+      box-shadow: 0 0 0 2px rgba(248,250,252,0.05), 0 8px 18px rgba(15,23,42,0.8);
+    }
+    header h1 small {
+      font-size: 11px;
+      color: var(--text-sub);
+      opacity: 0.9;
+    }
+
+    .tabs {
+      display: inline-flex;
+      padding: 3px;
+      border-radius: 999px;
+      background: rgba(15,23,42,0.8);
+      border: 1px solid rgba(148,163,184,0.45);
+      box-shadow: 0 10px 30px rgba(15,23,42,0.8);
+    }
+    .tab-btn {
+      border-radius: 999px;
+      border: none;
+      padding: 5px 14px;
+      font-size: 12px;
+      background: transparent;
+      cursor: pointer;
+      color: var(--text-sub);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all .18s ease-out;
+    }
+    .tab-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: rgba(148,163,184,0.7);
+    }
+    .tab-btn.active {
+      background: radial-gradient(circle at top left,#4f46e5,#0ea5e9);
+      color: #f9fafb;
+      box-shadow: 0 8px 22px rgba(59,130,246,0.85);
+    }
+    .tab-btn.active .tab-dot {
+      background: #facc15;
+      box-shadow: 0 0 0 2px rgba(250,204,21,0.25);
+    }
+
+    main {
+      max-width: 1180px;
+      margin: 18px auto 24px;
+      padding: 0 14px 24px;
+      display: grid;
+      grid-template-columns: minmax(0, 2.1fr) minmax(0, 1.4fr);
+      gap: 18px;
+    }
+    @media (max-width: 960px) {
+      main { grid-template-columns: 1fr; }
+    }
+
+    .card {
+      background: linear-gradient(135deg, rgba(15,23,42,0.96), rgba(15,23,42,0.9));
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--card-border);
+      box-shadow: var(--shadow-soft);
+      padding: 16px 16px 14px;
+      margin-bottom: 14px;
+      position: relative;
+      overflow: hidden;
+    }
+    .card::before {
+      content: "";
+      position: absolute;
+      inset: -80px;
+      opacity: 0.05;
+      background: radial-gradient(circle at top left,#38bdf8,transparent 55%);
+      pointer-events: none;
+    }
+    .card h2 {
+      font-size: 14px;
+      margin: 0 0 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      position: relative;
+      z-index: 1;
+    }
+    .card h2 span.icon {
+      width: 20px;
+      height: 20px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      color: #020617;
+      background: radial-gradient(circle at 30% 30%, #f9fafb, #e5e7eb);
+    }
+
+    .subtext {
+      font-size: 11px;
+      color: var(--text-sub);
+      margin-bottom: 8px;
+      position: relative;
+      z-index: 1;
+    }
+
+    label, .label {
+      font-size: 11px;
+      color: var(--text-sub);
+      margin-bottom: 3px;
+      display: inline-block;
+    }
+    select, input[type="text"], textarea {
+      width: 100%;
+      font-size: 12px;
+      border-radius: 10px;
+      padding: 6px 8px;
+      border: 1px solid #4b5563;
+      outline: none;
+      background: rgba(15,23,42,0.95);
+      color: var(--text-main);
+    }
+    select:focus, input[type="text"]:focus, textarea:focus {
+      border-color: #38bdf8;
+      box-shadow: 0 0 0 1px rgba(56,189,248,0.4);
+    }
+    textarea { resize: vertical; min-height: 60px; }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 999px;
+      border: none;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 500;
+      position: relative;
+      overflow: hidden;
+      isolation: isolate;
+    }
+    .btn-primary {
+      background-image: linear-gradient(135deg,#22c55e,#a855f7,#0ea5e9);
+      background-size: 200% 200%;
+      color: #f9fafb;
+      box-shadow: 0 12px 30px rgba(56,189,248,0.4);
+      border: 1px solid rgba(15,23,42,0.6);
+    }
+    .btn-primary::before {
+      content:"";
+      position:absolute;
+      inset:0;
+      background: radial-gradient(circle at 0 0,rgba(248,250,252,0.25),transparent 40%);
+      mix-blend-mode: screen;
+      opacity:0;
+      transition: opacity .18s ease-out;
+    }
+    .btn-primary:hover::before{opacity:1;}
+    .btn-primary:hover{
+      background-position:100% 0;
+      transform: translateY(-1px);
+      box-shadow: 0 14px 40px rgba(56,189,248,0.6);
+    }
+    .btn-ghost {
+      background: rgba(15,23,42,0.7);
+      border: 1px solid #4b5563;
+      color: var(--text-sub);
+    }
+    .btn-ghost:hover { background: rgba(31,41,55,0.95); }
+
+    .pill {
+      border-radius: 999px;
+      padding: 2px 8px;
+      font-size: 11px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      border: 1px solid transparent;
+    }
+    .pill-green {
+      background: rgba(34,197,94,0.15);
+      color: #bbf7d0;
+      border-color: rgba(34,197,94,0.7);
+    }
+    .pill-amber {
+      background: rgba(245,158,11,0.14);
+      color: #fed7aa;
+      border-color: rgba(245,158,11,0.7);
+    }
+    .pill-gray {
+      background: rgba(148,163,184,0.18);
+      color: #e5e7eb;
+      border-color: rgba(148,163,184,0.7);
+    }
+
+    .badge {
+      border-radius: 999px;
+      padding: 1px 6px;
+      font-size: 10px;
+      background: rgba(55,65,81,0.8);
+      color: #e5e7eb;
+    }
+
+    .question {
+      border-radius: 14px;
+      border: 1px solid rgba(75,85,99,0.9);
+      background: radial-gradient(circle at top left,rgba(15,23,42,0.96),rgba(15,23,42,0.98));
+      padding: 10px 10px 8px;
+      margin-bottom: 8px;
+      position: relative;
+      overflow: hidden;
+    }
+    .question::before{
+      content:"";
+      position:absolute;
+      inset:-40px;
+      background: radial-gradient(circle at top right,rgba(59,130,246,0.18),transparent 55%);
+      opacity:.4;
+      pointer-events:none;
+    }
+    .question p {
+      margin: 0 0 4px;
+      font-size: 13px;
+      position:relative;
+      z-index:1;
+    }
+
+    .option {
+      position:relative;
+      z-index:1;
+      display: flex;
+      align-items: flex-start;
+      gap: 6px;
+      font-size: 12px;
+      padding: 2px 0;
+    }
+    .option input[type="radio"] {
+      margin-top: 2px;
+      accent-color: #38bdf8;
+    }
+
+    .small {
+      font-size: 11px;
+      color: var(--text-sub);
+    }
+    .list-item {
+      font-size: 12px;
+      padding: 5px 0;
+      border-bottom: 1px dashed rgba(55,65,81,0.9);
+    }
+    .list-item:last-child { border-bottom: none; }
+
+    .toast {
+      position: fixed;
+      bottom: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(15,23,42,0.96);
+      color: #e5e7eb;
+      padding: 8px 14px;
+      border-radius: 999px;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 18px 45px rgba(15,23,42,0.9);
+      z-index: 999;
+      border:1px solid rgba(148,163,184,0.5);
+    }
+    .toast button {
+      background: transparent;
+      border: none;
+      color: #9ca3af;
+      cursor: pointer;
+      font-size: 12px;
+    }
+    code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 11px;
+      background: #020617;
+      color: #facc15;
+      padding: 2px 6px;
+      border-radius: 999px;
+    }
+
+    details summary {
+      cursor: pointer;
+      list-style: none;
+    }
+    details summary::-webkit-details-marker { display:none; }
+    details summary::before {
+      content:"▸";
+      display:inline-block;
+      margin-right:4px;
+      font-size:10px;
+      color:#9ca3af;
+      transform: translateY(-1px);
+    }
+    details[open] summary::before { content:"▾"; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>
+      <span class="logo">盾</span>
+      <span>
+        销售合规卫士
+        <br />
+        <small>培训 · 强制满分考试 · 实战纠错 · AI 画像</small>
+      </span>
+    </h1>
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="sales">
+        <span class="tab-dot"></span> 销售视角
+      </button>
+      <button class="tab-btn" data-tab="legal">
+        <span class="tab-dot"></span> 法务视角
+      </button>
+      <button class="tab-btn" data-tab="admin">
+        <span class="tab-dot"></span> 管理员视角
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <section id="left-panel"></section>
+    <aside id="right-panel"></aside>
+  </main>
+
+  <div id="toast" class="toast" style="display:none;">
+    <span id="toast-text"></span>
+    <button onclick="hideToast()">×</button>
+  </div>
+
+  <script>
+    // ---- 模拟数据 ----
+    const SALES = [
+      { id: 1, name: "张三", dept: "销售一部" },
+      { id: 2, name: "李四", dept: "销售二部" },
+      { id: 3, name: "王五", dept: "大客户部" },
+    ];
+
+    const QUESTIONS = [
+      {
+        id: 1,
+        text: "以下哪一项属于公司付款条款的红线？",
+        options: [
+          "账期超过90天且无任何担保/预付款",
+          "在合同中写明回款账户为公司对公账户",
+          "在合同中约定发票类型为专票",
+          "在合同中约定按月结算",
+        ],
+        correctIndex: 0,
+        tag: "付款条款-账期与担保",
+      },
+      {
+        id: 2,
+        text: "违约责任条款中，哪种写法更符合公司利益？",
+        options: [
+          "双方互为无限责任，对一切直接和间接损失负责",
+          "乙方承担所有直接损失，上不封顶",
+          "双方对直接损失承担责任，总额不超过当期合同金额或已付金额的一定比例",
+          "不设置违约金约定，交由法院自由裁量",
+        ],
+        correctIndex: 2,
+        tag: "违约责任-赔偿上限",
+      },
+      {
+        id: 3,
+        text: "关于知识产权，下列哪种说法是正确的？",
+        options: [
+          "只要合同签了，对方自动获得公司所有相关产品的知识产权",
+          "交付成果的知识产权归属可以单独约定，未约定时一般默认归开发方所有",
+          "交付成果知识产权一定归客户所有",
+          "合同中无需约定知识产权归属",
+        ],
+        correctIndex: 1,
+        tag: "知识产权-成果归属",
+      },
+    ];
+
+    const STORAGE_KEY = "sales_compliance_data_v2";
+
+    function loadData() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) return JSON.parse(raw);
+      } catch {}
+      return { exam_results: [], error_cases: [] };
+    }
+    function saveData() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    }
+
+    let data = loadData();
+    let currentTab = "sales";
+    let currentSalesId = SALES[0].id;
+
+    // ---- 工具函数 ----
+    function showToast(text) {
+      const toast = document.getElementById("toast");
+      document.getElementById("toast-text").innerText = text;
+      toast.style.display = "flex";
+      setTimeout(() => { toast.style.display = "none"; }, 3600);
+    }
+    function hideToast() {
+      document.getElementById("toast").style.display = "none";
+    }
+
+    function getMaxScore(userId) {
+      const scores = data.exam_results.filter(r => r.user_id === userId).map(r => r.score);
+      return scores.length ? Math.max(...scores) : null;
+    }
+    function getStatus(userId) {
+      const maxScore = getMaxScore(userId);
+      if (maxScore === null) return "未参加考试";
+      if (maxScore === 100) return "已合规上岗";
+      return "考试中（未满分）";
+    }
+    function getUserErrors(userId) {
+      return data.error_cases.filter(e => e.user_id === userId);
+    }
+
+    function analyzeClause(clause, note) {
+      const text = (clause || "") + " " + (note || "");
+      let category = "其他条款";
+      let tag = "表述不规范";
+      let severity = "中";
+      let analysis = "该条款存在一定风险，建议由法务进一步审查并修订。";
+
+      if (text.includes("付款") || text.includes("账期") || text.includes("回款")) {
+        category = "付款条款";
+        tag = "账期与回款保障";
+        analysis = "付款条款中账期/支付条件可能过长或不清晰，需确保有预付款、担保或合理账期。";
+      } else if (text.includes("违约") || text.includes("赔偿") || text.includes("损失")) {
+        category = "违约责任";
+        tag = "赔偿范围与上限";
+        analysis = "违约责任的赔偿范围或上限未明确，可能导致公司承担过高责任。";
+      } else if (text.includes("知识产权") || text.includes("IP") || text.includes("著作权")) {
+        category = "知识产权";
+        tag = "成果归属与授权范围";
+        analysis = "知识产权归属或授权范围不清晰，需确保公司保留核心权益或约定合理授权。";
+      } else if (text.includes("保密") || text.includes("机密")) {
+        category = "保密条款";
+        tag = "保密义务与例外";
+        analysis = "保密义务的范围、期限或例外情形不明确，可能影响信息安全和合规。";
+      }
+
+      if (
+        text.includes("无限") ||
+        text.includes("所有直接和间接损失") ||
+        text.includes("全部直接和间接损失")
+      ) {
+        severity = "高";
+        analysis = "条款中存在“无限责任”或承担所有直接和间接损失的表述，风险很高，必须由法务调整。";
+      }
+      return { category, tag, severity, analysis };
+    }
+
+    function buildProfile(userId) {
+      const maxScore = getMaxScore(userId);
+      const errors = getUserErrors(userId);
+      const totalErrors = errors.length;
+      const highErrors = errors.filter(e => e.severity === "高").length;
+
+      const tagCount = {};
+      errors.forEach(e => {
+        if (!e.tag) return;
+        tagCount[e.tag] = (tagCount[e.tag] || 0) + 1;
+      });
+      const topTags = Object.entries(tagCount)
+        .sort((a,b)=>b[1]-a[1])
+        .slice(0,3);
+
+      let summary = "暂无完整数据。";
+      if (maxScore === null && totalErrors === 0) {
+        summary = "尚未参加考试，也尚未在合同中暴露错误，建议尽快完成基础合规培训。";
+      } else if (maxScore === 100 && totalErrors === 0) {
+        summary = "考试已满分通过，当前无记录错误，合规基础较好，请保持。";
+      } else if (maxScore === 100 && totalErrors > 0) {
+        summary = "理论考试表现良好，但在实际合同中仍有错误暴露，建议结合错误案例进行针对性复盘。";
+      } else if (maxScore !== null && maxScore < 100 && totalErrors > 0) {
+        summary = "考试尚未满分且实务中多次出现错误，建议尽快完成基础培训，并由法务进行重点辅导。";
+      } else if (maxScore !== null && maxScore < 100 && totalErrors === 0) {
+        summary = "尚未满分通过考试，建议优先完成考试，并关注高风险条款的学习。";
+      }
+      return { maxScore, totalErrors, highErrors, topTags, summary };
+    }
+
+    // ---- 右侧面板 ----
+    function renderRightPanel() {
+      const right = document.getElementById("right-panel");
+      const s = SALES.find(x => x.id === currentSalesId);
+      const profile = buildProfile(currentSalesId);
+
+      let html = `<div class="card">
+        <h2><span class="icon">🧠</span>${s.name} 的合规画像</h2>
+        <div class="small">部门：${s.dept}</div>
+        <ul class="small" style="margin-top:6px;padding-left:16px;">
+          <li>最高考试分：${profile.maxScore !== null ? profile.maxScore + " 分" : "暂无"}</li>
+          <li>记录错误次数：${profile.totalErrors}（其中高严重度 ${profile.highErrors}）</li>
+          <li>高频风险知识点：${
+            profile.topTags.length
+              ? profile.topTags.map(t => `${t[0]}（${t[1]} 次）`).join("，")
+              : "暂无"
+          }</li>
+        </ul>
+        <div class="small" style="margin-top:8px;padding:8px 10px;border-radius:12px;background:rgba(15,23,42,0.9);border:1px solid #4b5563;">
+          ${profile.summary}
+        </div>
+      </div>`;
+
+      html += `<div class="card">
+        <h2><span class="icon">📊</span>全员合规状态一览</h2>`;
+
+      SALES.forEach(sale => {
+        const p = buildProfile(sale.id);
+        const status = getStatus(sale.id);
+        let pillClass = "pill-gray";
+        if (status === "已合规上岗") pillClass = "pill-green";
+        else if (status === "考试中（未满分）") pillClass = "pill-amber";
+
+        html += `<div class="list-item">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
+            <div>
+              <div><strong>${sale.name}</strong> · ${sale.dept}</div>
+              <div class="small">最高分：${p.maxScore ?? 0} · 错误：${p.totalErrors}</div>
+            </div>
+            <span class="pill ${pillClass}">${status}</span>
+          </div>
+        </div>`;
+      });
+
+      html += `</div>`;
+      right.innerHTML = html;
+    }
+
+    // ---- 左侧：视角切换 ----
+    function renderSalesView() {
+      const s = SALES.find(x => x.id === currentSalesId);
+      const status = getStatus(currentSalesId);
+      const maxScore = getMaxScore(currentSalesId);
+
+      let html = `<div class="card">
+        <h2><span class="icon">📚</span>销售视角：基础合规考试</h2>
+        <div class="subtext">必须 100 分才视为“合规上岗”，可以多次答题，以最高分为准。</div>
+        <div class="small" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:6px;">
+          <span>当前销售：<strong>${s.name}</strong>（${s.dept}）</span>
+          <span>最高分：<strong>${maxScore ?? "暂无"}</strong></span>
+          <span>状态：<code>${status}</code></span>
+        </div>
+        <div id="questions-area">`;
+
+      QUESTIONS.forEach(q => {
+        html += `<div class="question">
+          <p><strong>Q${q.id}.</strong> ${q.text}</p>
+          <div class="small" style="margin-bottom:4px;">知识点：${q.tag}</div>`;
+        q.options.forEach((opt, idx) => {
+          const id = `q${q.id}_opt${idx}`;
+          html += `<label class="option">
+            <input type="radio" name="q${q.id}" value="${idx}" id="${id}" />
+            <span>${opt}</span>
+          </label>`;
+        });
+        html += `</div>`;
+      });
+
+      html += `</div>
+        <button class="btn btn-primary" style="margin-top:6px;" onclick="submitExam()">提交并评分 ✅</button>
+      </div>`;
+
+      document.getElementById("left-panel").innerHTML = html;
+    }
+
+    function renderLegalView() {
+      let html = `<div class="card">
+        <h2><span class="icon">⚖️</span>法务视角：录入错误条款 + 自动分析</h2>
+        <div class="subtext">发现合同有问题的条款时，选销售 + 粘贴条款，一键生成标签和风险说明。</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+          <div>
+            <label>涉及销售</label>
+            <select id="legal-sales">`;
+      SALES.forEach(s => {
+        html += `<option value="${s.id}">${s.name}（${s.dept}）</option>`;
+      });
+      html += `</select>
+          </div>
+          <div>
+            <label>合同 / 项目名称</label>
+            <input type="text" id="contract-name" placeholder="例如：2025年度 XX 客户服务合同" />
+          </div>
+        </div>
+        <div style="margin-bottom:8px;">
+          <label>错误条款原文</label>
+          <textarea id="clause" rows="5" placeholder="把销售写错或有风险的条款粘贴到这里……"></textarea>
+        </div>
+        <div style="margin-bottom:8px;">
+          <label>法务补充说明（可选）</label>
+          <textarea id="note" rows="3" placeholder="例如：赔偿责任约定严重失衡，对我方极其不利；需增加赔偿上限等。"></textarea>
+        </div>
+        <button class="btn btn-primary" onclick="submitError()">提交并自动分析 🔍</button>
+      </div>`;
+
+      html += `<div class="card">
+        <h2><span class="icon">📂</span>最近录入的错误</h2>`;
+
+      if (!data.error_cases.length) {
+        html += `<div class="small">目前还没有任何错误记录。</div>`;
+      } else {
+        data.error_cases.slice(0, 10).forEach(e => {
+          const user = SALES.find(s => s.id === e.user_id);
+          html += `<details class="list-item">
+            <summary>
+              <span class="small">${e.time}</span> · 
+              <strong>${user ? user.name : "未知销售"}</strong> · 
+              <span class="small">${e.contract_name}</span> · 
+              <span class="badge">${e.category}</span> · 
+              <span class="badge">严重：${e.severity}</span>
+            </summary>
+            <div class="small" style="margin-top:4px;"><strong>知识标签：</strong>${e.tag}</div>
+            <div class="small"><strong>错误条款：</strong><br/>${e.clause.replace(/\n/g,"<br/>")}</div>`;
+          if (e.note) {
+            html += `<div class="small"><strong>法务备注：</strong>${e.note}</div>`;
+          }
+          html += `<div class="small"><strong>风险说明：</strong>${e.analysis}</div>
+          </details>`;
+        });
+      }
+
+      html += `</div>`;
+      document.getElementById("left-panel").innerHTML = html;
+    }
+
+    function renderAdminView() {
+      let html = `<div class="card">
+        <h2><span class="icon">🛠</span>管理员视角：全员画像</h2>
+        <div class="subtext">示例版未做登录控制，如果要密码或单点登录，可以在后端接企业统一认证。</div>`;
+
+      SALES.forEach(s => {
+        const p = buildProfile(s.id);
+        html += `<div class="list-item">
+          <div><strong>${s.name}</strong> · ${s.dept}</div>
+          <div class="small">最高分：${p.maxScore ?? 0} · 错误：${p.totalErrors} · 高严重：${p.highErrors}</div>
+        </div>`;
+      });
+
+      html += `</div>`;
+
+      const s = SALES.find(x => x.id === currentSalesId);
+      const p = buildProfile(currentSalesId);
+
+      html += `<div class="card">
+        <h2><span class="icon">🔍</span>指定销售的详细画像</h2>
+        <div style="margin-bottom:8px;">
+          <label>选择销售</label>
+          <select id="admin-sales" onchange="onAdminSalesChange(this.value)">`;
+      SALES.forEach(sale => {
+        html += `<option value="${sale.id}" ${sale.id===currentSalesId?"selected":""}>${sale.name}（${sale.dept}）</option>`;
+      });
+      html += `</select>
+        </div>
+        <ul class="small" style="padding-left:16px;">
+          <li>最高考试分：${p.maxScore !== null ? p.maxScore : "暂无"}</li>
+          <li>记录错误总数：${p.totalErrors}（其中高严重度 ${p.highErrors}）</li>
+          <li>高频风险知识点：${
+            p.topTags.length ? p.topTags.map(t => `${t[0]}（${t[1]} 次）`).join("，") : "暂无"
+          }</li>
+        </ul>
+        <div class="small" style="margin-top:8px;padding:8px 10px;border-radius:12px;background:rgba(15,23,42,0.9);border:1px solid #4b5563;">
+          ${p.summary}
+        </div>
+        <div style="margin-top:8px;">
+          <div class="label">原始错误记录：</div>`;
+      const errs = getUserErrors(currentSalesId);
+      if (!errs.length) {
+        html += `<div class="small">该销售暂时还没有错误记录。</div>`;
+      } else {
+        errs.forEach(e => {
+          html += `<div class="small" style="margin-bottom:4px;">
+            - ${e.time} · ${e.contract_name} · ${e.category} · 严重：${e.severity} · 标签：${e.tag}
+          </div>`;
+        });
+      }
+      html += `</div></div>`;
+
+      document.getElementById("left-panel").innerHTML = html;
+    }
+
+    // ---- 提交逻辑 ----
+    function submitExam() {
+      const answers = {};
+      let missing = 0;
+      QUESTIONS.forEach(q => {
+        const chosen = document.querySelector(`input[name="q${q.id}"]:checked`);
+        if (!chosen) missing++;
+        else answers[q.id] = Number(chosen.value);
+      });
+      if (missing > 0) {
+        showToast(`还有 ${missing} 题未作答`);
+        return;
+      }
+      let correct = 0;
+      QUESTIONS.forEach(q => {
+        if (answers[q.id] === q.correctIndex) correct++;
+      });
+      const score = Math.round((correct / QUESTIONS.length) * 100);
+      data.exam_results.push({
+        user_id: currentSalesId,
+        score,
+        time: new Date().toLocaleString(),
+      });
+      saveData();
+      if (score === 100) {
+        showToast(`本次得分 ${score} 分：已满分通过，系统记录为“合规上岗”。`);
+      } else {
+        showToast(`本次得分 ${score} 分，尚未达到 100 分，请继续学习并再次作答。`);
+      }
+      renderRightPanel();
+    }
+
+    function submitError() {
+      const salesId = Number(document.getElementById("legal-sales").value);
+      const contractName = document.getElementById("contract-name").value.trim();
+      const clause = document.getElementById("clause").value.trim();
+      const note = document.getElementById("note").value.trim();
+      if (!contractName || !clause) {
+        showToast("合同名称和错误条款不能为空。");
+        return;
+      }
+      const ai = analyzeClause(clause, note);
+      data.error_cases.unshift({
+        user_id: salesId,
+        contract_name: contractName,
+        clause,
+        note,
+        category: ai.category,
+        tag: ai.tag,
+        severity: ai.severity,
+        analysis: ai.analysis,
+        time: new Date().toLocaleString(),
+      });
+      saveData();
+      showToast("已记录该错误并生成风险标签。");
+      renderLeftPanel();
+      renderRightPanel();
+    }
+
+    function onAdminSalesChange(val) {
+      currentSalesId = Number(val);
+      renderLeftPanel();
+      renderRightPanel();
+    }
+
+    function renderLeftPanel() {
+      if (currentTab === "sales") renderSalesView();
+      else if (currentTab === "legal") renderLegalView();
+      else renderAdminView();
+    }
+
+    document.querySelectorAll(".tab-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        currentTab = btn.dataset.tab;
+        renderLeftPanel();
+        renderRightPanel();
+      });
+    });
+
+    // 初次渲染
+    renderLeftPanel();
+    renderRightPanel();
+  </script>
+</body>
+</html>
